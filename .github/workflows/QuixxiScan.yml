@@ -1,0 +1,90 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Quixxi Pipeline
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      # Copiar el APK generado a un directorio de "artifacts"
+      - name: Preparar directorio de artifacts
+        run: |
+          mkdir -p artifacts
+          cp app/release/*.apk artifacts/
+          ls -al artifacts
+
+      # 3. Subir el artifact "drop" 
+      - name: Subir artifact drop
+        uses: actions/upload-artifact@v3
+        with:
+          name: drop
+          path: artifacts
+
+      # 4. Configurar Node.js
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+
+      # 5. Instalar la CLI de Quixxi
+      - name: Instalar Quixxi CLI
+        run: npm install -g quixxi-cli
+
+      # 6. Ejecutar comandos de Quixxi (login, listar apps, scan, etc.)
+      - name: Ejecutar comandos de Quixxi
+        env:
+          PASS: ${{ secrets.PASS }}   # Asegúrate de tener el secreto PASS definido en GitHub
+        run: |
+          echo "Ejecutando Quixxi help"
+          quixxi help
+          
+          echo "Ejecutando Quixxi login"
+          # Se redirige la contraseña desde la variable de entorno PASS
+          echo "$PASS" | quixxi login -u $USER
+          quixxi list apps
+          
+          echo "Buscando APK en artifacts"
+          ls -al artifacts
+          
+          echo "Ejecutando Quixxi scan"
+          # Ajusta la ruta del APK y del reporte según corresponda
+          quixxi scan -a MyNewApp -f artifacts/app-release.apk -d artifacts/sample.pdf
+          
+          echo "Mostrando contenido del directorio artifacts"
+          ls -al artifacts
+
+      # 7. Subir el reporte generado por Quixxi Scan
+      - name: Subir reporte de Quixxi Scan
+        uses: actions/upload-artifact@v3
+        with:
+          name: ScanReport
+          path: artifacts/sample.pdf
+
+      # Runs a set of commands using the runners shell
+      #- name: Run a multi-line script
+      #  run: |
+      #    echo Add other actions to build,
+      #    echo test, and deploy your project.
