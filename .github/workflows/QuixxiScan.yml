@@ -38,10 +38,12 @@ jobs:
 
       # 3. Subir el artifact "drop" 
       - name: Subir artifact drop
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6.0
         with:
           name: drop
           path: artifacts
+
+
 
       # 4. Configurar Node.js
       - name: Configurar Node.js
@@ -78,7 +80,7 @@ jobs:
 
       # 7. Subir el reporte generado por Quixxi Scan
       - name: Subir reporte de Quixxi Scan
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6.0
         with:
           name: ScanReport
           path: artifacts/sample.pdf
