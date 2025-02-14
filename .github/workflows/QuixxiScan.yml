@@ -65,7 +65,7 @@ jobs:
           
           echo "Ejecutando Quixxi login"
           # Se redirige la contraseña desde la variable de entorno PASS
-          echo "$PASS" | quixxi login -u $USER
+          echo "${{ secrets.PASS }}" | quixxi login -u ${{ secrets.USER }}
           quixxi list apps
           
           echo "Buscando APK en artifacts"
